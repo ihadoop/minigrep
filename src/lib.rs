@@ -18,13 +18,9 @@ Pick three.";
 }
 
 pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
-    let mut result: Vec<&str> = Vec::new();
-    for line in contents.lines() {
-        if line.contains(query) {
-            result.push(line);
-        }
-    }
-    result
+
+    contents.lines().filter(|v| v.contains(query)).collect()
+
 }
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     let content = fs::read_to_string(config.filename).unwrap();
@@ -34,21 +30,27 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     }
     Ok(())
 }
-pub struct Config<'a> {
-    str: &'a String,
-    filename: &'a String,
+pub struct Config {
+    str: String,
+    filename: String,
 }
 
-impl Config<'_> {
-    pub fn build(args: &[String]) -> Result<Config, &str> {
+impl Config {
+    pub fn build<'a>(mut args: impl Iterator<Item = String>) -> Result<Config, &'a str> {
+        args.next();
         //check length
-        if args.len() < 3 {
-            return Err("input args size must eq 2");
-        }
+        let query = match args.next() {
+            Some(str) => str,
+            None => return Err("Didn't get a query string"),
+        };
 
+        let file_name = match args.next() {
+            Some(str) => str,
+            None => return Err("filename parse error"),
+        };
         Ok(Config {
-            str: &args[1],
-            filename: &args[2],
+            str: query,
+            filename: file_name,
         })
     }
 }
