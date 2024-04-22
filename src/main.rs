@@ -1,27 +1,22 @@
 use std::env;
+use std::error;
 use std::fs;
+use std::process;
+use std::error::Error;
+use minigrep::Config;
+use minigrep::run;
 fn main() {
     let args: Vec<String> = env::args().collect();
 
-    let config = Config::new(&args);
-    println!("{}", config.filename)
-}
+    //exception process,using unwrap_or_else
+    let config = Config::build(&args).unwrap_or_else(|err| {
+        println!("Problem parsing arguments: {err}");
+        process::exit(1);
+    });
 
-struct Config<'a> {
-    str: &'a String,
-    filename: &'a String,
-}
+    if let Err(error) = run(config){
 
-impl Config<'_> {
-    fn new(args: &[String]) -> Config {
-        //check length
-        if args.len() < 2 {
-            panic!("");
-        }
-
-        Config {
-            str: &args[1],
-            filename: &args[2],
-        }
     }
+
 }
+
